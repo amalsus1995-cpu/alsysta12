@@ -1,0 +1,148 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #050608;
+  color: #fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  direction: rtl;
+}
+
+header {
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #d4af37, #c0c0c0);
+  color: #000;
+}
+
+h1, h2, h3 {
+  margin: 8px 0;
+}
+
+main {
+  padding: 16px;
+  padding-bottom: 80px; /* مساحة للمنيو السفلي */
+}
+
+.card {
+  background: #13141a;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.card video {
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0b0c10;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button.primary {
+  background: #d4af37;
+  color: #000;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: #444;
+  color: #fff;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.row button {
+  flex: 1;
+}
+
+.quick-topup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-topup button {
+  flex: 1;
+  min-width: 80px;
+}
+
+.status {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ffd369;
+}
+
+.hint {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #111318;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.bottom-nav a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  text-align: center;
+}
+
+.bottom-nav a.active {
+  color: #d4af37;
+  font-weight: 700;
+}
+
+.mini {
+  border-top: 1px solid #222;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.mini img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.mini .date {
+  font-size: 11px;
+  color: #aaa;
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بيتكوين كاش - محفظتي</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>💼 محفظتي</h1>
+    <p>هنا ترى رصيدك بالنقاط والدولار، وتقدم طلبات سحب.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>الرصيد الحالي</h2>
+      <p id="balance-text">جاري التحميل...</p>
+    </section>
+
+    <section class="card">
+      <h2>طلب سحب</h2>
+      <form id="withdraw-form">
+        <label>المبلغ المطلوب (دولار)</label>
+        <input type="number" id="amount" min="1" required />
+        <label>عنوان المحفظة (BTC)</label>
+        <input type="text" id="wallet-address" required />
+        <button type="submit" class="primary">إرسال طلب السحب</button>
+      </form>
+      <p class="hint">السحب يدوي ويتم خلال 20 يوم كحد أدنى بعد الشحن.</p>
+      <p id="withdraw-status" class="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>إثباتات الدفع المرسلة</h2>
+      <div id="payments-list">جاري التحميل...</div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="profile.html">👤 الملف الشخصي</a>
+    <a href="ads.html">📺 الإعلانات</a>
+    <a href="wallet.html" class="active">💼 محفظتي</a>
+    <a href="about.html">ℹ️ من نحن</a>
+  </nav>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const balanceText = document.getElementById('balance-text');
+    const withdrawForm = document.getElementById('withdraw-form');
+    const withdrawStatus = document.getElementById('withdraw-status');
+    const paymentsList = document.getElementById('payments-list');
+
+    async function loadBalance() {
+      const user = await getCurrentUser();
+      if (!user) {
+        balanceText.textContent = 'الرجاء تسجيل الدخول من الصفحة الرئيسية.';
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users_data')
+        .select('points, balance_usd')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        balanceText.textContent = 'خطأ في جلب الرصيد: ' + error.message;
+      } else {
+        const pts = data.points ?? 0;
+        const usd = data.balance_usd ?? 0;
+        balanceText.textContent = `النقاط: ${pts} نقطة  |  الرصيد بالدولار: $${usd}`;
+      }
+    }
+
+    async function loadPayments() {
+      const user = await getCurrentUser();
+      if (!user) {
+        paymentsList.textContent = 'الرجاء تسجيل الدخول.';
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('id', { ascending: false });
+
+      if (error) {
+        paymentsList.textContent = 'خطأ في جلب إثباتات الدفع: ' + error.message;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        paymentsList.textContent = 'لا يوجد إثباتات بعد.';
+        return;
+      }
+
+      paymentsList.innerHTML = '';
+      data.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'mini';
+        div.innerHTML = `
+          <p>مبلغ: $${p.amount}</p>
+          ${p.image_url ? `<img src="${p.image_url}" alt="إثبات" />` : ''}
+          <p class="date">${new Date(p.created_at).toLocaleString('ar-SY')}</p>
+        `;
+        paymentsList.appendChild(div);
+      });
+    }
+
+    withdrawForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      withdrawStatus.textContent = 'جاري إرسال الطلب...';
+
+      const user = await getCurrentUser();
+      if (!user) {
+        withdrawStatus.textContent = 'يجب تسجيل الدخول.';
+        return;
+      }
+
+      const amount = Number(document.getElementById('amount').value);
+      const wallet = document.getElementById('wallet-address').value.trim();
+
+      const { data, error } = await supabase.from('withdrawals').insert({
+        user_id: user.id,
+        amount,
+        wallet_address: wallet,
+      });
+
+      if (error) {
+        withdrawStatus.textContent = 'خطأ: ' + error.message;
+      } else {
+        withdrawStatus.textContent = 'تم إرسال طلب السحب ✅';
+        withdrawForm.reset();
+      }
+    });
+
+    loadBalance();
+    loadPayments();
+  </script>
+</body>
+</html>

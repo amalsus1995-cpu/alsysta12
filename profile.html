@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بيتكوين كاش - الملف الشخصي</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>👤 الملف الشخصي</h1>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>بيانات المستخدم</h2>
+      <p id="user-email">جاري التحميل...</p>
+      <button id="logout-btn" class="secondary">تسجيل الخروج</button>
+      <p id="logout-status" class="status"></p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="profile.html" class="active">👤 الملف الشخصي</a>
+    <a href="ads.html">📺 الإعلانات</a>
+    <a href="wallet.html">💼 محفظتي</a>
+    <a href="about.html">ℹ️ من نحن</a>
+  </nav>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const userEmailEl = document.getElementById('user-email');
+    const logoutStatus = document.getElementById('logout-status');
+
+    async function loadProfile() {
+      const user = await getCurrentUser();
+      if (!user) {
+        userEmailEl.textContent = 'غير مسجل دخول. الرجاء العودة للصفحة الرئيسية وتسجيل الدخول.';
+        return;
+      }
+      userEmailEl.textContent = 'الإيميل: ' + user.email;
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        logoutStatus.textContent = 'خطأ: ' + error.message;
+      } else {
+        logoutStatus.textContent = 'تم تسجيل الخروج.';
+        setTimeout(() => (window.location.href = 'index.html'), 1000);
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بيتكوين كاش - إثبات الدفع</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>📤 إثبات الدفع / شحن الرصيد</h1>
+    <p>بعد تحويل المبلغ إلى محفظتنا، قم برفع صورة التحويل ليتم تأكيد الشحن.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>بيانات العملية</h2>
+      <p id="amount-info"></p>
+      <p class="hint">عنوان محفظتنا (BTC): <strong>ضع_العنوان_هنا</strong></p>
+
+      <label>رابط صورة إثبات التحويل (مثلاً من تليغرام، جوجل درايف، ...)</label>
+      <input type="url" id="image-url" placeholder="https://..." />
+
+      <label>ملاحظة (اختياري)</label>
+      <textarea id="note" rows="3" placeholder="أي تفاصيل إضافية"></textarea>
+
+      <button id="send-proof" class="primary">إرسال الإثبات</button>
+      <p id="proof-status" class="status"></p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="profile.html">👤 الملف الشخصي</a>
+    <a href="ads.html">📺 الإعلانات</a>
+    <a href="wallet.html">💼 محفظتي</a>
+    <a href="about.html">ℹ️ من نحن</a>
+  </nav>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const amountInfo = document.getElementById('amount-info');
+    const imageUrlInput = document.getElementById('image-url');
+    const noteInput = document.getElementById('note');
+    const statusEl = document.getElementById('proof-status');
+
+    function getAmountFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const amount = params.get('amount');
+      return amount ? Number(amount) : null;
+    }
+
+    async function initPage() {
+      const amount = getAmountFromUrl();
+      if (amount) {
+        amountInfo.textContent = 'المبلغ المطلوب شحنه: $' + amount;
+      } else {
+        amountInfo.textContent = 'المبلغ غير محدد من الصفحة الرئيسية.';
+      }
+    }
+
+    document.getElementById('send-proof').addEventListener('click', async () => {
+      statusEl.textContent = 'جاري الإرسال...';
+
+      const user = await getCurrentUser();
+      if (!user) {
+        statusEl.textContent = 'الرجاء تسجيل الدخول أولاً من الصفحة الرئيسية.';
+        return;
+      }
+
+      const amount = getAmountFromUrl() || 0;
+      const imageUrl = imageUrlInput.value.trim();
+      const note = noteInput.value.trim();
+
+      const { data, error } = await supabase.from('payments').insert({
+        user_id: user.id,
+        amount,
+        image_url: imageUrl,
+        note,
+      });
+
+      if (error) {
+        statusEl.textContent = 'خطأ: ' + error.message;
+      } else {
+        statusEl.textContent = 'تم إرسال إثبات الدفع ✅ سيتم مراجعة الطلب يدوياً.';
+        imageUrlInput.value = '';
+        noteInput.value = '';
+      }
+    });
+
+    initPage();
+  </script>
+</body>
+</html>

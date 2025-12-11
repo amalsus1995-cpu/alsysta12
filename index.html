@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بيتكوين كاش - الرئيسية</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>💰 بيتكوين كاش</h1>
+    <p>موقع استثمار وربح من مشاهدة الإعلانات</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>تسجيل الدخول / إنشاء حساب</h2>
+      <form id="auth-form">
+        <label>الإيميل</label>
+        <input type="email" id="email" required />
+        <label>كلمة المرور</label>
+        <input type="password" id="password" required />
+        <div class="row">
+          <button type="button" id="login-btn">تسجيل دخول</button>
+          <button type="button" id="signup-btn" class="secondary">إنشاء حساب</button>
+        </div>
+      </form>
+      <p id="auth-status" class="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>شحن مباشر (بالدولار)</h2>
+      <div class="quick-topup">
+        <button data-amount="10">$10</button>
+        <button data-amount="50">$50</button>
+        <button data-amount="100">$100</button>
+        <button data-amount="200">$200</button>
+        <button data-amount="500">$500</button>
+      </div>
+      <p class="hint">عند اختيار مبلغ الشحن سيتم نقلك إلى صفحة إثبات الدفع وإرسال صورة التحويل.</p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="profile.html">👤 الملف الشخصي</a>
+    <a href="ads.html">📺 الإعلانات</a>
+    <a href="wallet.html">💼 محفظتي</a>
+    <a href="about.html">ℹ️ من نحن</a>
+  </nav>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const emailEl = document.getElementById('email');
+    const passEl = document.getElementById('password');
+    const statusEl = document.getElementById('auth-status');
+
+    async function doSignup() {
+      statusEl.textContent = 'جاري إنشاء الحساب...';
+      const { data, error } = await supabase.auth.signUp({
+        email: emailEl.value,
+        password: passEl.value,
+      });
+      if (error) {
+        statusEl.textContent = 'خطأ: ' + error.message;
+      } else {
+        statusEl.textContent = 'تم إنشاء الحساب، تأكد من الإيميل ثم سجل الدخول.';
+      }
+    }
+
+    async function doLogin() {
+      statusEl.textContent = 'جاري تسجيل الدخول...';
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailEl.value,
+        password: passEl.value,
+      });
+      if (error) {
+        statusEl.textContent = 'خطأ: ' + error.message;
+      } else {
+        statusEl.textContent = 'تم تسجيل الدخول ✅';
+      }
+    }
+
+    document.getElementById('signup-btn').onclick = doSignup;
+    document.getElementById('login-btn').onclick = doLogin;
+
+    // أزرار الشحن
+    document.querySelectorAll('.quick-topup button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const amount = btn.dataset.amount;
+        // الانتقال إلى صفحة إثبات الدفع مع المبلغ
+        window.location.href = 'payment-proof.html?amount=' + amount;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>بيتكوين كاش - الإعلانات</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>📺 الإعلانات المتاحة</h1>
+    <p>شاهد الإعلان لتحصل على نقاط ثم تتحول إلى دولار في محفظتك.</p>
+  </header>
+
+  <main>
+    <section id="ads-list">
+      <p>جاري تحميل الإعلانات...</p>
+    </section>
+    <p id="ads-status" class="status"></p>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="profile.html">👤 الملف الشخصي</a>
+    <a href="ads.html" class="active">📺 الإعلانات</a>
+    <a href="wallet.html">💼 محفظتي</a>
+    <a href="about.html">ℹ️ من نحن</a>
+  </nav>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script>
+    const adsContainer = document.getElementById('ads-list');
+    const statusEl = document.getElementById('ads-status');
+
+    async function loadAds() {
+      const user = await getCurrentUser();
+      if (!user) {
+        statusEl.textContent = 'الرجاء تسجيل الدخول من الصفحة الرئيسية أولاً.';
+        adsContainer.innerHTML = '';
+        return;
+      }
+
+      const { data, error } = await supabase.from('ads').select('*').order('id');
+      if (error) {
+        statusEl.textContent = 'خطأ في تحميل الإعلانات: ' + error.message;
+        return;
+      }
+      if (!data || data.length === 0) {
+        adsContainer.innerHTML = '<p>لا يوجد إعلانات حالياً.</p>';
+        return;
+      }
+
+      adsContainer.innerHTML = '';
+      data.forEach(ad => {
+        const box = document.createElement('div');
+        box.className = 'card';
+
+        box.innerHTML = `
+          <h3>إعلان رقم ${ad.id}</h3>
+          <video width="100%" controls src="${ad.video_url}"></video>
+          <button class="primary watch-btn" data-ad-id="${ad.id}">✅ شاهدت الإعلان</button>
+        `;
+        adsContainer.appendChild(box);
+      });
+
+      document.querySelectorAll('.watch-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleWatched(btn.dataset.adId));
+      });
+    }
+
+    async function handleWatched(adId) {
+      statusEl.textContent = 'جاري تسجيل المشاهدة...';
+
+      const user = await getCurrentUser();
+      if (!user) {
+        statusEl.textContent = 'يجب تسجيل الدخول أولاً.';
+        return;
+      }
+
+      // تسجيل في جدول views_log
+      const { data, error } = await supabase.from('views_log').insert({
+        user_id: user.id,
+        ad_id: adId,
+      });
+
+      if (error) {
+        statusEl.textContent = 'خطأ في تسجيل المشاهدة: ' + error.message;
+      } else {
+        statusEl.textContent = 'تم تسجيل المشاهدة ✅. سيتم إضافة النقاط إلى حسابك.';
+      }
+    }
+
+    loadAds();
+  </script>
+</body>
+</html>
