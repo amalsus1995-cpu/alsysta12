@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الصفحة الرئيسية | بيتكوين كاش</title>
+
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.header {
+  background: linear-gradient(to left, #d4af37, #c0c0c0);
+  padding: 25px;
+  border-radius: 12px;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+.box {
+  background: #222;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 15px 0;
+}
+
+button {
+  width: 90%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  margin-top: 10px;
+  cursor: pointer;
+  background: gold;
+  color: black;
+  font-weight: bold;
+}
+
+.menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #000;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #333;
+}
+
+.menu a {
+  text-decoration: none;
+  color: white;
+  font-size: 18px;
+}
+</style>
+</head>
+
+
+<body>
+
+<!-- حماية تسجيل الدخول -->
+<script src="supabase.js"></script>
+<script>
+supabase.auth.getSession().then(({ data }) => {
+  if (!data.session) {
+    window.location.href = "index.html"; 
+  } else {
+    loadUser(data.session.user.id);
+  }
+});
+</script>
+
+<div class="header">👋 أهلاً بك في <b>بيتكوين كاش</b></div>
+
+<div id="user-box" class="box">
+  <h2 id="welcome">جارِ التحميل...</h2>
+  <p id="balance">رصيدك: 0$</p>
+  <p id="points">نقاطك: 0 نقطة</p>
+</div>
+
+<div class="box">
+  <button onclick="location.href='ads.html'">📺 مشاهدة الإعلانات</button>
+  <button onclick="location.href='wallet.html'">💰 المحفظة</button>
+  <button onclick="location.href='deposit.html'">💵 شحن الرصيد</button>
+</div>
+
+<!-- القائمة السفلية -->
+<div class="menu">
+  <a href="home.html">🏠 الرئيسية</a>
+  <a href="ads.html">📺 الإعلانات</a>
+  <a href="wallet.html">💼 محفظتي</a>
+  <a href="profile.html">👤 الملف الشخصي</a>
+</div>
+
+
+<script>
+// تحميل بيانات المستخدم من قاعدة البيانات
+async function loadUser(uid) {
+  const { data, error } = await supabase
+    .from("users_data")
+    .select("*")
+    .eq("id", uid)
+    .single();
+
+  if (error || !data) {
+    document.getElementById("welcome").innerText = "مرحباً!";
+    return;
+  }
+
+  document.getElementById("welcome").innerText = "مرحباً، " + (data.username || "عضو");
+  document.getElementById("balance").innerText = "رصيدك: " + data.balance + "$";
+  document.getElementById("points").innerText = "نقاطك: " + data.points;
+}
+</script>
+
+</body>
+</html>
